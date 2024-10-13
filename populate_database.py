@@ -1,5 +1,10 @@
+# populate_database.py
+
 import os
-import sqlite3
+import re
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Base, Resume, Posting, Recruiter
 
 def read_files_from_folder(folder_path):
     documents = []
@@ -13,60 +18,72 @@ def read_files_from_folder(folder_path):
                 filenames.append(filename)
     return documents, filenames
 
-def create_database():
-    conn = sqlite3.connect('resumes_postings.db')
-    cursor = conn.cursor()
-
-    # Create tables
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS resumes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT,
-            content TEXT
-        )
-    ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS postings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT,
-            content TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-def insert_into_database(table_name, filenames, documents):
-    conn = sqlite3.connect('resumes_postings.db')
-    cursor = conn.cursor()
-
-    for filename, content in zip(filenames, documents):
-        cursor.execute(f'''
-            INSERT INTO {table_name} (filename, content)
-            VALUES (?, ?)
-        ''', (filename, content))
-
-    conn.commit()
-    conn.close()
-
 def main():
-    # Paths to the folders containing resumes and job postings
-    resume_folder = 'gen_res'
-    posting_folder = 'gen_posting'
+    # Remove existing database file
+    if os.path.exists('resumes_postings.db'):
+        os.remove('resumes_postings.db')
+        print("Existing database removed.")
 
-    # Read resumes and job postings
+    # Create the database and establish a session
+    engine = create_engine('sqlite:///resumes_postings.db')
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # Paths to folders
+    resume_folder = 'resume'
+    posting_folder = 'posting'
+    recruiters_folder = 'recruiters'
+
+    # Insert resumes
     resumes, resume_filenames = read_files_from_folder(resume_folder)
+    for filename, content in zip(resume_filenames, resumes):
+        resume = Resume(filename=filename, content=content)
+        session.add(resume)
+
+    # Insert postings
     postings, posting_filenames = read_files_from_folder(posting_folder)
+    postings_dict = {}  # To keep track of postings by posting number
+    for filename, content in zip(posting_filenames, postings):
+        posting = Posting(filename=filename, content=content)
+        session.add(posting)
 
-    # Create the database and tables
-    create_database()
+        # Extract posting number
+        match = re.match(r'posting_(\d+)\.txt', filename)
+        if match:
+            posting_num = match.group(1)
+            postings_dict[posting_num] = posting
+        else:
+            print(f"Warning: Could not extract posting number from filename {filename}")
 
-    # Insert resumes into the database
-    insert_into_database('resumes', resume_filenames, resumes)
+    session.commit()
 
-    # Insert postings into the database
-    insert_into_database('postings', posting_filenames, postings)
+    # Insert recruiters
+    recruiter_files = sorted(os.listdir(recruiters_folder))
+    for recruiter_filename in recruiter_files:
+        if recruiter_filename.endswith('.txt'):
+            file_path = os.path.join(recruiters_folder, recruiter_filename)
+            with open(file_path, 'r', encoding='utf-8') as file:
+                emails = [line.strip() for line in file]
 
-    print("Database 'resumes_postings.db' has been populated with resumes and job postings.")
+            # Extract posting number from recruiter filename
+            match = re.match(r'recruiters_posting(\d+)\.txt', recruiter_filename)
+            if match:
+                posting_num = match.group(1)
+                posting = postings_dict.get(posting_num)
+                if posting:
+                    for email in emails:
+                        recruiter = Recruiter(email=email, posting=posting)
+                        session.add(recruiter)
+                else:
+                    print(f"Warning: No posting found for recruiter file {recruiter_filename}")
+            else:
+                print(f"Warning: Could not extract posting number from recruiter file {recruiter_filename}")
+
+    session.commit()
+    session.close()
+
+    print("Database 'resumes_postings.db' has been populated with resumes, job postings, and recruiters.")
 
 if __name__ == '__main__':
     main()

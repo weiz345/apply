@@ -1,12 +1,16 @@
-import sqlite3
+# similarity_from_db.py
+
 import re
 import numpy as np
 import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Base, Resume, Posting
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-import nltk
 
 # Download NLTK data (only the first time)
 nltk.download('stopwords')
@@ -22,60 +26,49 @@ def preprocess_text(text):
     words = [ps.stem(w) for w in words if w not in set(stopwords.words('english'))]
     return ' '.join(words)
 
-def fetch_data_from_database():
-    conn = sqlite3.connect('resumes_postings.db')
-    cursor = conn.cursor()
-
-    # Fetch resumes
-    cursor.execute('SELECT filename, content FROM resumes ORDER BY id')
-    resumes_data = cursor.fetchall()
-    resume_filenames = [row[0] for row in resumes_data]
-    resumes = [row[1] for row in resumes_data]
-
-    # Fetch postings
-    cursor.execute('SELECT filename, content FROM postings ORDER BY id')
-    postings_data = cursor.fetchall()
-    posting_filenames = [row[0] for row in postings_data]
-    postings = [row[1] for row in postings_data]
-
-    conn.close()
-    return resumes, resume_filenames, postings, posting_filenames
-
 def main():
-    # Fetch resumes and job postings from the database
-    resumes, resume_filenames, postings, posting_filenames = fetch_data_from_database()
+    # Create the database session
+    engine = create_engine('sqlite:///resumes_postings.db')
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-    # Preprocess the texts
-    preprocessed_resumes = [preprocess_text(resume) for resume in resumes]
-    preprocessed_postings = [preprocess_text(posting) for posting in postings]
+    # Fetch resumes and postings
+    resumes = session.query(Resume).order_by(Resume.id).all()
+    postings = session.query(Posting).order_by(Posting.id).all()
+
+    # Preprocess texts
+    preprocessed_resumes = [preprocess_text(resume.content) for resume in resumes]
+    preprocessed_postings = [preprocess_text(posting.content) for posting in postings]
 
     # Combine documents for vectorization
     all_documents = preprocessed_resumes + preprocessed_postings
 
-    # Vectorize the documents using TF-IDF
+    # Vectorize using TF-IDF
     tfidf_vectorizer = TfidfVectorizer()
     tfidf_matrix = tfidf_vectorizer.fit_transform(all_documents)
 
-    # Separate the TF-IDF vectors for resumes and postings
+    # Separate the TF-IDF vectors
     resume_vectors = tfidf_matrix[:len(preprocessed_resumes)]
     posting_vectors = tfidf_matrix[len(preprocessed_resumes):]
 
-    # Compute the cosine similarity matrix
+    # Compute cosine similarity
     similarity_matrix = cosine_similarity(resume_vectors, posting_vectors)
 
-    # Round the similarity scores for better readability
+    # Round the similarity scores
     similarity_matrix = np.round(similarity_matrix, 2)
 
-    # Create a DataFrame for the similarity matrix
+    # Create a DataFrame
     similarity_df = pd.DataFrame(
         similarity_matrix,
-        index=[f'Resume {i+1}' for i in range(len(preprocessed_resumes))],
-        columns=[f'Job Posting {j+1}' for j in range(len(preprocessed_postings))]
+        index=[f'Resume {i+1}' for i in range(len(resumes))],
+        columns=[f'Job Posting {j+1}' for j in range(len(postings))]
     )
 
     # Display the similarity matrix
     print("Similarity Matrix (Resumes vs. Job Postings):\n")
     print(similarity_df)
+
+    session.close()
 
 if __name__ == '__main__':
     main()
