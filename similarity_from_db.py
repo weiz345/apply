@@ -1,4 +1,4 @@
-import os
+import sqlite3
 import re
 import numpy as np
 import pandas as pd
@@ -22,26 +22,28 @@ def preprocess_text(text):
     words = [ps.stem(w) for w in words if w not in set(stopwords.words('english'))]
     return ' '.join(words)
 
-def read_files_from_folder(folder_path):
-    documents = []
-    filenames = []
-    for filename in sorted(os.listdir(folder_path)):
-        if filename.endswith('.txt'):
-            file_path = os.path.join(folder_path, filename)
-            with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read()
-                documents.append(content)
-                filenames.append(filename)
-    return documents, filenames
+def fetch_data_from_database():
+    conn = sqlite3.connect('resumes_postings.db')
+    cursor = conn.cursor()
+
+    # Fetch resumes
+    cursor.execute('SELECT filename, content FROM resumes ORDER BY id')
+    resumes_data = cursor.fetchall()
+    resume_filenames = [row[0] for row in resumes_data]
+    resumes = [row[1] for row in resumes_data]
+
+    # Fetch postings
+    cursor.execute('SELECT filename, content FROM postings ORDER BY id')
+    postings_data = cursor.fetchall()
+    posting_filenames = [row[0] for row in postings_data]
+    postings = [row[1] for row in postings_data]
+
+    conn.close()
+    return resumes, resume_filenames, postings, posting_filenames
 
 def main():
-    # Paths to the folders containing resumes and job postings
-    resume_folder = 'gen_res'
-    posting_folder = 'gen_posting'
-
-    # Read resumes and job postings
-    resumes, resume_filenames = read_files_from_folder(resume_folder)
-    postings, posting_filenames = read_files_from_folder(posting_folder)
+    # Fetch resumes and job postings from the database
+    resumes, resume_filenames, postings, posting_filenames = fetch_data_from_database()
 
     # Preprocess the texts
     preprocessed_resumes = [preprocess_text(resume) for resume in resumes]
