@@ -79,6 +79,13 @@ def main():
                     print(f"Warning: No posting found for recruiter file {recruiter_filename}")
             else:
                 print(f"Warning: Could not extract posting number from recruiter file {recruiter_filename}")
+    # Display postings with their recruiters
+    for posting in session.query(Posting).order_by(Posting.id).all():
+        print(f"\nJob Posting ID: {posting.id}, Filename: {posting.filename}")
+        print("Recruiters:")
+        for recruiter in posting.recruiters:
+            print(f" - {recruiter.email}")
+
 
     session.commit()
     session.close()
