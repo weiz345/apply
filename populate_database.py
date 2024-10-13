@@ -4,7 +4,7 @@ import os
 import re
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, Resume, Posting, Recruiter
+from models import Base, Resume, Posting, Recruiter, UserEmail
 
 def read_files_from_folder(folder_path):
     documents = []
@@ -34,12 +34,22 @@ def main():
     resume_folder = 'resume'
     posting_folder = 'posting'
     recruiters_folder = 'recruiters'
+    user_emails_folder = 'user_emails'
 
     # Insert resumes
     resumes, resume_filenames = read_files_from_folder(resume_folder)
+    resumes_dict = {}  # To keep track of resumes by resume number
     for filename, content in zip(resume_filenames, resumes):
         resume = Resume(filename=filename, content=content)
         session.add(resume)
+
+        # Extract resume number
+        match = re.match(r'resume_(\d+)\.txt', filename)
+        if match:
+            resume_num = match.group(1)
+            resumes_dict[resume_num] = resume
+        else:
+            print(f"Warning: Could not extract resume number from filename {filename}")
 
     # Insert postings
     postings, posting_filenames = read_files_from_folder(posting_folder)
@@ -79,18 +89,53 @@ def main():
                     print(f"Warning: No posting found for recruiter file {recruiter_filename}")
             else:
                 print(f"Warning: Could not extract posting number from recruiter file {recruiter_filename}")
-    # Display postings with their recruiters
+
+    # Insert user emails
+    user_email_files = sorted(os.listdir(user_emails_folder))
+    for user_email_filename in user_email_files:
+        if user_email_filename.endswith('.txt'):
+            file_path = os.path.join(user_emails_folder, user_email_filename)
+            with open(file_path, 'r', encoding='utf-8') as file:
+                emails = [line.strip() for line in file]
+
+            # Extract resume number from user email filename
+            match = re.match(r'user_emails_resume(\d+)\.txt', user_email_filename)
+            if match:
+                resume_num = match.group(1)
+                resume = resumes_dict.get(resume_num)
+                if resume:
+                    for email in emails:
+                        user_email = UserEmail(email=email, resume=resume)
+                        session.add(user_email)
+                else:
+                    print(f"Warning: No resume found for user email file {user_email_filename}")
+            else:
+                print(f"Warning: Could not extract resume number from user email file {user_email_filename}")
+
+    session.commit()
+
+    # Verification: Print out the associations
+    print("\n--- Associations for Verification ---\n")
+
+    # Print resumes with their user emails
+    print("Resumes and Associated User Emails:")
+    for resume in session.query(Resume).order_by(Resume.id).all():
+        print(f"\nResume ID: {resume.id}, Filename: {resume.filename}")
+        print("User Emails:")
+        for user_email in resume.user_emails:
+            print(f" - {user_email.email}")
+
+    # Print postings with their recruiters
+    print("\nPostings and Associated Recruiters:")
     for posting in session.query(Posting).order_by(Posting.id).all():
         print(f"\nJob Posting ID: {posting.id}, Filename: {posting.filename}")
         print("Recruiters:")
         for recruiter in posting.recruiters:
             print(f" - {recruiter.email}")
 
-
-    session.commit()
     session.close()
 
-    print("Database 'resumes_postings.db' has been populated with resumes, job postings, and recruiters.")
+    print("\nDatabase 'resumes_postings.db' has been populated with resumes, job postings, recruiters, and user emails.")
 
 if __name__ == '__main__':
     main()
