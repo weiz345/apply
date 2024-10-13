@@ -1,0 +1,29 @@
+Michael Brown
+Email: michael.brown@example.com
+Phone: (555) 123-4567
+Address: 789 Oak Avenue, Smallville, USA
+
+Objective:
+Experienced Registered Nurse seeking to provide exceptional patient care at Mercy General Hospital.
+
+Experience:
+Registered Nurse – Emergency Department
+County Hospital | January 2016 – Present
+- Provided critical care to patients in a high-volume emergency room.
+- Collaborated with interdisciplinary teams to improve patient outcomes.
+- Trained and mentored new nursing staff.
+
+Education:
+Bachelor of Science in Nursing (BSN)
+Smallville College | 2011 – 2015
+
+Certifications:
+- Registered Nurse License
+- Advanced Cardiac Life Support (ACLS)
+- Pediatric Advanced Life Support (PALS)
+
+Skills:
+- Patient Assessment
+- Critical Care Nursing
+- Electronic Health Records (EHR)
+- IV Therapy

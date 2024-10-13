@@ -1,0 +1,31 @@
+**Software Engineer**
+
+*Company:* Tech Innovators Inc.
+*Location:* Anytown, USA
+*Type:* Full-time
+
+**Job Description:**
+Tech Innovators Inc. is seeking a skilled Software Engineer to join our dynamic development team. The ideal candidate will have experience in building high-performing, scalable, enterprise-grade applications.
+
+**Responsibilities:**
+- Develop and maintain web applications using JavaScript, React, and Node.js.
+- Participate in all phases of the development lifecycle.
+- Write well-designed, testable, and efficient code.
+- Collaborate with cross-functional teams to define, design, and ship new features.
+- Troubleshoot and debug applications.
+
+**Qualifications:**
+- Bachelor's degree in Computer Science or related field.
+- 3+ years of professional software development experience.
+- Proficient in JavaScript, React, and Node.js.
+- Experience with RESTful APIs and microservices architecture.
+- Familiarity with Agile development methodologies.
+
+**Benefits:**
+- Competitive salary
+- Health, dental, and vision insurance
+- 401(k) matching
+- Paid time off and holidays
+
+**How to Apply:**
+Submit your resume and cover letter to careers@techinnovators.com with the subject line "Software Engineer Application."
