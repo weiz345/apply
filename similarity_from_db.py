@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, Resume, Posting
+from models import db, Resume, Posting
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import nltk

@@ -1,0 +1,23 @@
+<!-- templates/upload_posting.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Job Posting</title>
+</head>
+<body>
+    <h1>Upload Job Posting</h1>
+    <form method="post">
+        <label for="filename">Job Posting Filename:</label><br>
+        <input type="text" id="filename" name="filename" required><br><br>
+
+        <label for="content">Job Posting Content:</label><br>
+        <textarea id="content" name="content" rows="10" cols="50" required></textarea><br><br>
+
+        <label for="recruiter_emails">Recruiter Emails (comma-separated):</label><br>
+        <input type="text" id="recruiter_emails" name="recruiter_emails"><br><br>
+
+        <input type="submit" value="Upload Job Posting">
+    </form>
+</body>
+</html>

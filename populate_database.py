@@ -4,7 +4,7 @@ import os
 import re
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, Resume, Posting, Recruiter, UserEmail
+from models import db, Resume, Posting, Recruiter, UserEmail
 
 def read_files_from_folder(folder_path):
     documents = []
@@ -26,7 +26,7 @@ def main():
 
     # Create the database and establish a session
     engine = create_engine('sqlite:///resumes_postings.db')
-    Base.metadata.create_all(engine)
+    db.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
 
