@@ -11,6 +11,7 @@ This project automates the process of matching resumes to job postings, calculat
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [File Descriptions](#file-descriptions)
+- [Requirements](#requirements)
 - [License](#license)
 
 ## Overview
@@ -56,6 +57,12 @@ The main goal of this project is to streamline the job application process by au
 
    ```bash
    pip install -r requirements.txt
+   ```
+
+   Alternatively, you can install the packages individually:
+
+   ```bash
+   pip install openai flask flask_sqlalchemy SQLAlchemy pandas numpy scikit-learn nltk pyperclip
    ```
 
 4. **Set up environment variables**
@@ -239,7 +246,28 @@ Folder containing text files with user emails associated with resumes.
 
 Contains all the Python packages required for the project.
 
+## Requirements
+
+The `requirements.txt` file includes the following packages:
+
+```
+openai
+flask
+flask_sqlalchemy
+SQLAlchemy
+pandas
+numpy
+scikit-learn
+nltk
+pyperclip
+```
+
+Ensure these packages are installed to run the project successfully.
+
 ## License
 
 This project is licensed under the MIT License.
 
+---
+
+Feel free to contribute to this project by opening issues or submitting pull requests.

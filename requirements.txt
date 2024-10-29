@@ -1,0 +1,9 @@
+openai
+flask
+flask_sqlalchemy
+SQLAlchemy
+pandas
+numpy
+scikit-learn
+nltk
+pyperclip
