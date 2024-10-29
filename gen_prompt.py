@@ -1,5 +1,6 @@
 import glob
 import os
+import pyperclip
 
 def combine_python_files():
     py_files = glob.glob('*.py')
@@ -14,4 +15,5 @@ def combine_python_files():
 
 if __name__ == "__main__":
     output = combine_python_files()
-    print(output)
+    pyperclip.copy(output)
+    print("Combined content has been copied to the clipboard.")
