@@ -59,7 +59,7 @@ def generate_cold_email(resume_text, job_posting_text):
 
 def main():
     # Set your OpenAI API key
-    openai.api_key = 'sk-OBKbLVUO4SwqPkeIXecluyNG3UZMTsgwtxkNFMTMXST3BlbkFJ-uqUXp2vOniWxOBFMuRuVHtnA4uH5R7e5NODrDrWkA'
+    openai.api_key = ''
     if not openai.api_key:
         print("Please set your OpenAI API key as the environment variable 'OPENAI_API_KEY'")
         return

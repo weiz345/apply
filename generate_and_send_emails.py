@@ -82,7 +82,7 @@ def send_email(sender_email, sender_password, recipient_email, email_body, user_
 
 def main():
     # Set your OpenAI API key
-    openai.api_key = 'sk-OBKbLVUO4SwqPkeIXecluyNG3UZMTsgwtxkNFMTMXST3BlbkFJ-uqUXp2vOniWxOBFMuRuVHtnA4uH5R7e5NODrDrWkA'
+    openai.api_key = ''
     if not openai.api_key:
         print("Please set your OpenAI API key as the environment variable 'OPENAI_API_KEY'")
         return

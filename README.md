@@ -120,6 +120,7 @@ Access the application by navigating to `http://localhost:5000` in your web brow
 ```
 ├── app.py                         # Flask web application
 ├── app_combined.py                # Combined app with all functionalities
+├── app_respond.py                 # App with additional response handling
 ├── gen_prompt.py                  # Script to generate prompt
 ├── generate_and_print_email.py    # Generate and print emails from the database
 ├── generate_and_send_emails.py    # Generate and send emails from the database
