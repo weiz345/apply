@@ -1,7 +1,7 @@
 import openai
 
 # Replace 'YOUR_API_KEY' with your actual OpenAI API key
-openai.api_key = 'YOUR_API_KEY'
+openai.api_key = 'sk-OBKbLVUO4SwqPkeIXecluyNG3UZMTsgwtxkNFMTMXST3BlbkFJ-uqUXp2vOniWxOBFMuRuVHtnA4uH5R7e5NODrDrWkA'
 
 def generate_cold_email(resume_text, job_posting_text):
     # Adapted to use Chat API with gpt-3.5-turbo or gpt-4-turbo
