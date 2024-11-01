@@ -1,164 +1,109 @@
-# Automated Cold Email Generator for Job Applications
+# README: Resume and Job Posting Matching with Automated Email Generation
 
-## Introduction
+This project automates resume and job posting matching using cosine similarity on text embeddings and generates personalized cold emails for recruiters. The application includes a Flask web interface for users to upload resumes and job postings, which are stored in an SQLite database. Upon finding high similarity between a resume and a job posting, the app generates and sends a cold email to the recruiter on behalf of the user.
 
-This project is an automated system designed to help job seekers generate and send personalized cold emails to recruiters based on the content of their resumes and job postings. It utilizes Natural Language Processing (NLP) techniques to compute the similarity between resumes and job postings and leverages OpenAI's GPT-4 model to craft persuasive emails tailored to each opportunity.
+## Table of Contents
+1. [Project Structure](#project-structure)
+2. [Installation](#installation)
+3. [Environment Variables](#environment-variables)
+4. [Usage](#usage)
+5. [Database](#database)
+6. [Detailed File Explanations](#detailed-file-explanations)
+7. [Acknowledgements](#acknowledgements)
 
-## Features
+---
 
-- **Resume and Job Posting Management**: Store and manage multiple resumes and job postings in a SQLite database.
-- **Similarity Computation**: Use TF-IDF vectorization and cosine similarity to match resumes with relevant job postings.
-- **Email Generation**: Generate personalized cold emails using OpenAI's GPT-4 model.
-- **Automated Email Sending**: Send generated emails to recruiters via SMTP.
-- **Web Interface**: Interact with the system using a Flask web application.
+## Project Structure
 
-## Prerequisites
+The project is organized as follows:
 
-- Python 3.x
-- An OpenAI API key
-- A Gmail account with an App Password (if using Gmail with two-factor authentication)
-- Required Python packages (listed in `requirements.txt`)
+- `app.py`: The main Flask app that handles routes for resume and posting uploads, similarity calculation, email generation, and sending.
+- `models.py`: Defines the database models for `Resume`, `Posting`, `UserEmail`, and `Recruiter`.
+- `generate_and_send_emails_with_app_context.py`: Matches resumes to job postings based on similarity and sends emails within the Flask app context.
+- `populate_database.py`: Populates the database with resume and job posting data from text files.
+- `similarity_from_db.py`: Computes the similarity matrix between all resumes and job postings in the database.
+- `send_email.py`: Standalone script for sending emails.
+- `generate_cold_email.py`: Generates personalized cold emails based on resume and job posting content.
+- `rm_except.py`: Utility script to delete unnecessary files, retaining essential files as specified.
+- `print_database_contents_app.py`: Prints all data stored in the database for verification.
+- `gen_prompt.py`: Utility to combine all Python files for easy sharing or logging.
+- `requirements.txt`: Lists all required Python libraries.
 
 ## Installation
 
-### 1. Clone the Repository
+### Prerequisites
+- Python 3.x
+- `pip` package manager
 
+1. Clone the repository:
+   ```bash
+   git clone <repository_url>
+   cd <repository_directory>
+   ```
+
+2. Install required libraries:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Download NLTK stopwords:
+   ```python
+   import nltk
+   nltk.download('stopwords')
+   ```
+
+## Environment Variables
+
+Set the following environment variables:
+
+- `OPENAI_API_KEY`: Your OpenAI API key for generating emails.
+- `SENDER_EMAIL`: The email address that will send emails on behalf of users.
+- `SENDER_PASSWORD`: The email account password (use an app password if 2FA is enabled).
+
+Example:
 ```bash
-git clone https://github.com/yourusername/yourrepository.git
-cd yourrepository
-```
-
-### 2. Create and Activate a Virtual Environment (Optional but Recommended)
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-```
-
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-## Configuration
-
-### 1. Set Up Environment Variables
-
-Create a `.env` file in the root directory of the project and add the following variables:
-
-```env
-OPENAI_API_KEY=your_openai_api_key
-SENDER_EMAIL=your_email@example.com
-SENDER_PASSWORD=your_email_password_or_app_password
-```
-
-- Replace `your_openai_api_key` with your actual OpenAI API key.
-- Replace `your_email@example.com` with your email address.
-- Replace `your_email_password_or_app_password` with your email password or app password.
-
-**Note**: For security reasons, do not hardcode your API keys or passwords in the code. Use environment variables instead.
-
-### 2. Configure SMTP Settings
-
-If you are using an email service other than Gmail, update the SMTP server settings in the `send_email` function within the code:
-
-```python
-with smtplib.SMTP("smtp.gmail.com", 587) as server:
-    server.starttls()
-    server.login(SENDER_EMAIL, SENDER_PASSWORD)
-    # ...
+export OPENAI_API_KEY='your_openai_api_key'
+export SENDER_EMAIL='your_email@example.com'
+export SENDER_PASSWORD='your_email_password'
 ```
 
 ## Usage
 
-### 1. Populate the Database
+### Running the Application
 
-First, populate the SQLite database with resumes, job postings, recruiters, and user emails.
+1. Start the Flask app:
+   ```bash
+   python app.py
+   ```
 
+2. Access the web interface at `http://127.0.0.1:5000/`:
+   - **Upload Resume**: Upload resume text and specify associated emails.
+   - **Upload Posting**: Upload job posting text and specify recruiter emails.
+
+### Email Generation and Sending
+
+- After uploading, the app calculates similarity between resumes and job postings.
+- If similarity exceeds the threshold, a cold email is generated and sent to the recruiters associated with the matched job posting.
+
+## Database
+
+The project uses SQLite (`resumes_postings.db`) for simplicity, managed via SQLAlchemy. Each resume or job posting is associated with one or more user emails or recruiter emails, respectively.
+
+To view all entries:
 ```bash
-python populate_database.py
+python print_database_contents_app.py
 ```
 
-Alternatively, if you are using the Flask web application, you can upload resumes and job postings via the web interface.
+## Detailed File Explanations
 
-### 2. Compute Similarity and Generate Emails
+- **`generate_and_send_emails_with_app_context.py`**: Automates matching resumes and job postings and sends emails if similarity exceeds the threshold.
+- **`populate_database.py`**: Reads resumes and postings from text files and populates the database.
+- **`similarity_from_db.py`**: Calculates and displays a similarity matrix between resumes and job postings.
+- **`send_email.py`**: Simple script to send a test email.
+- **`generate_cold_email.py`**: Uses OpenAI to create personalized cold emails.
+- **`rm_except.py`**: Utility to delete files not on the exceptions list.
+- **`gen_prompt.py`**: Utility to combine Python files into one, useful for sharing or generating comprehensive code snippets.
+  
+## Acknowledgements
 
-To compute the similarity between resumes and job postings, and generate cold emails for matching pairs:
-
-```bash
-python generate_and_send_emails.py
-```
-
-This script will:
-
-- Fetch resumes and job postings from the database.
-- Compute the similarity between each resume and job posting.
-- For pairs exceeding the similarity threshold, generate a cold email using OpenAI's GPT-4 model.
-- Send the generated emails to the associated recruiters.
-
-### 3. View the Database Contents (Optional)
-
-To print the contents of the database for verification:
-
-```bash
-python print_database_contents.py
-```
-
-### 4. Run the Web Application (Optional)
-
-You can run the Flask web application to interact with the system via a web interface.
-
-```bash
-python app.py
-```
-
-Access the application by navigating to `http://localhost:5000` in your web browser.
-
-## Directory Structure
-
-```
-├── app.py                         # Flask web application
-├── app_combined.py                # Combined app with all functionalities
-├── app_respond.py                 # App with additional response handling
-├── gen_prompt.py                  # Script to generate prompt
-├── generate_and_print_email.py    # Generate and print emails from the database
-├── generate_and_send_emails.py    # Generate and send emails from the database
-├── generate_and_send_emails_with_app_context.py
-├── generate_cold_email.py         # Generate cold email based on resume and posting
-├── models.py                      # Database models
-├── populate_database.py           # Populate the database
-├── populate_database_app.py       # Populate the database with app context
-├── print_database_contents.py     # Print database contents
-├── print_database_contents_app.py
-├── requirements.txt               # Python dependencies
-├── send_email.py                  # Script to send a test email
-├── similarity_from_db.py          # Compute similarity from the database
-├── similarity_from_db_app.py      # Compute similarity with app context
-├── templates/
-│   ├── index.html                 # Home page template
-│   ├── upload_posting.html        # Template for uploading postings
-│   └── upload_resume.html         # Template for uploading resumes
-```
-
-## Security Considerations
-
-- **API Keys and Passwords**: Never commit your API keys or passwords to source control. Use environment variables or a configuration file that is excluded from version control (e.g., include it in your `.gitignore` file).
-- **Email Sending Limitations**: Be aware of your email service provider's sending limits and policies to avoid being flagged for spam.
-- **Data Privacy**: Ensure you have the right to use and store any resumes and job postings, and comply with all relevant data protection regulations.
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
-
-## Acknowledgments
-
-- **OpenAI GPT-4**: For powering the email generation.
-- **Flask**: A lightweight WSGI web application framework.
-- **NLTK**: Natural Language Toolkit for text processing.
-- **scikit-learn**: For machine learning algorithms and tools.
-- **SQLite**: A lightweight disk-based database.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project was inspired by the need for efficient and automated job application processes using modern NLP and ML tools. The `TfidfVectorizer` and `cosine_similarity` functions from `sklearn` enable high-quality resume and job posting matching, while OpenAI's API aids in generating professionally styled emails.
