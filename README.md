@@ -1,34 +1,50 @@
-# README: Automated Resume and Job Posting Matching System
+# Resume & Job Posting Matching System
 
-This project automates matching between resumes and job postings by calculating cosine similarity on text embeddings and generating cold emails for recruiters when a match is found. Users can upload resumes and job postings through a Flask web interface, where they are stored in an SQLite database. The app then identifies strong matches, generates a cold email for the user, and sends it to the relevant recruiter.
+This project is a Flask-based application for managing resumes, job postings, and associated user and recruiter emails. It allows users to upload resumes and job postings, automatically match them based on content similarity, generate customized cold emails, and send these emails to recruiters on behalf of the user. The database is managed with SQLAlchemy, and text processing is handled using natural language processing (NLP) techniques.
 
----
+## Features
+1. **Resume & Posting Uploads**: Users can upload resumes and job postings through the web interface.
+2. **Database Management**: Resumes, job postings, user emails, and recruiter emails are stored in a SQLite database.
+3. **Automatic Matching**: Resumes and job postings are matched based on content similarity using TF-IDF and cosine similarity.
+4. **Cold Email Generation**: OpenAI's GPT-4 is used to generate personalized cold emails.
+5. **Email Sending**: Cold emails are sent to recruiters using the specified user’s email address.
+6. **File Structure Management**: Unwanted files in the project directory can be removed with a safe cleanup script.
 
-## Project Structure
+## File Descriptions
 
-### Key Files
+### 1. `app.py`
+The main entry point for the Flask application. Defines routes for uploading resumes and postings. Registers event listeners for new database inserts.
 
-- **`app_respond.py`**: Main Flask application file. Handles resume and job posting uploads, similarity calculation, email generation, and email sending.
-- **`populate_database_app.py`**: Populates the database with resumes, job postings, recruiters, and user email data. Pulls text files from designated folders, processes them, and inserts them into the database.
-- **`rm_except.py`**: Utility script to delete all files in the project directory except those on a specified exceptions list.
-- **`gen_prompt.py`**: Combines all `.py` files into a single string and copies it to the clipboard for easy sharing.
-- **`print_database_contents_app.py`**: Prints all contents of the database for verification, displaying resumes, postings, recruiters, and user emails.
-- **`models.py`**: Defines SQLAlchemy models for `Resume`, `Posting`, `UserEmail`, and `Recruiter`, which manage the database tables and relationships.
+### 2. `populate_database_app.py`
+Script to populate the database by reading files from specific folders for resumes, job postings, recruiters, and user emails. Verifies associations between entries and prints summaries.
 
----
+### 3. `rm_except.py`
+A utility script that removes files and directories in the root project folder except for those specified in an exceptions list.
 
-## Installation
+### 4. `factory.py`
+Factory function to create and configure the Flask app, including database initialization.
 
-### Prerequisites
-- **Python 3.x**
-- **pip** package manager
+### 5. `processing.py`
+Processes and matches resumes to job postings using TF-IDF and cosine similarity. Generates cold emails using OpenAI and sends emails to recruiters associated with matched job postings.
 
-### Setup Instructions
+### 6. `event_listeners.py`
+Defines SQLAlchemy event listeners that trigger automatic processing when new resumes or postings are inserted into the database.
+
+### 7. `gen_prompt.py`
+Combines the contents of all Python files in the directory into a single output, facilitating easy sharing of the entire codebase.
+
+### 8. `print_database_contents_app.py`
+A debugging tool to print the contents of the database tables to the console, allowing verification of database entries.
+
+### 9. `models.py`
+Defines the SQLAlchemy models for `Resume`, `Posting`, `Recruiter`, and `UserEmail`, along with their relationships.
+
+## Setup Instructions
 
 1. **Clone the Repository**:
    ```bash
-   git clone <repository_url>
-   cd <repository_directory>
+   git clone https://github.com/your-repo/resume-matching-app.git
+   cd resume-matching-app
    ```
 
 2. **Install Dependencies**:
@@ -36,65 +52,51 @@ This project automates matching between resumes and job postings by calculating 
    pip install -r requirements.txt
    ```
 
-3. **Download NLTK Data**:
-   ```python
-   import nltk
-   nltk.download('stopwords')
-   ```
+3. **Set Up Environment Variables**:
+   - `OPENAI_API_KEY`: API key for OpenAI.
+   - `SENDER_PASSWORD`: Password for the email account used to send cold emails.
+   - Save these in a `.env` file or set them directly in the terminal.
 
-4. **Set Environment Variables**:
-   Set your `OpenAI` API key, sender email, and email password as environment variables.
-
-   ```bash
-   export OPENAI_API_KEY='your_openai_api_key'
-   export SENDER_EMAIL='your_email@example.com'
-   export SENDER_PASSWORD='your_email_password'
-   ```
-
----
-
-## Usage
-
-### Running the Application
-
-1. **Start the Flask App**:
-   ```bash
-   python app_respond.py
-   ```
-2. **Access the Interface**:
-   Open your browser and navigate to `http://127.0.0.1:5000/`.
-
-   - **Upload Resume**: Enter resume text and associated user emails.
-   - **Upload Posting**: Enter job posting text and associated recruiter emails.
-
-### Database Population
-
-1. To populate the database with sample data, run:
+4. **Initialize Database**:
+   Run `populate_database_app.py` to create the database and populate it with data from the `resume`, `posting`, `recruiters`, and `user_emails` folders:
    ```bash
    python populate_database_app.py
    ```
 
-2. **Verify Data**:
-   To view all entries, run:
+5. **Run the Application**:
    ```bash
-   python print_database_contents_app.py
+   python app.py
+   ```
+   The application will be available at `http://localhost:5000`.
+
+6. **Clean Up Project Directory**:
+   Run `rm_except.py` to remove unnecessary files from the directory, preserving essential files only:
+   ```bash
+   python rm_except.py
    ```
 
-### Automated Email Generation
+## Usage
 
-Upon upload, resumes and job postings are matched based on text similarity. If a match exceeds the similarity threshold, a cold email is generated using OpenAI and sent to the recruiter via SMTP.
+1. **Uploading Resumes and Postings**:
+   - Access the app's interface to upload resumes and job postings.
+   - Specify user and recruiter emails as comma-separated values in the upload form.
+
+2. **Database Management**:
+   - Use `print_database_contents_app.py` to print current database entries for verification:
+     ```bash
+     python print_database_contents_app.py
+     ```
+
+3. **File Processing**:
+   - Trigger resume and posting processing automatically through event listeners when new entries are added to the database.
+
+## License
+This project is licensed under the MIT License. See `LICENSE` for more details.
+
+## Acknowledgements
+- OpenAI for their API.
+- NLTK and Scikit-Learn for text preprocessing and similarity calculations.
 
 ---
 
-## Database Structure
-
-- **Resume**: Stores each resume and its associated user emails.
-- **Posting**: Stores each job posting and its associated recruiter emails.
-- **UserEmail**: Links user emails to resumes.
-- **Recruiter**: Links recruiter emails to job postings.
-
----
-
-## Acknowledgments
-
-This project leverages the **NLTK** library for text processing and **OpenAI's GPT API** to generate professional cold emails. The **TF-IDF Vectorizer** and **cosine similarity** functions from **sklearn** are used for matching resumes to job postings.
+This readme should provide clear instructions and overview for using the resume matching system. Let me know if you need more customization!
