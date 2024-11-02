@@ -1,9 +1,12 @@
-# populate_database_with_app_context.py
+# populate_database_app.py
 
+from factory import create_app
+from models import db, Resume, Posting, Recruiter, UserEmail
 import os
 import re
-from flask import current_app
-from app import app, db, Resume, Posting, Recruiter, UserEmail
+
+# Import event listeners to register them
+import event_listeners
 
 def read_files_from_folder(folder_path):
     documents = []
@@ -18,6 +21,7 @@ def read_files_from_folder(folder_path):
     return documents, filenames
 
 def main():
+    app = create_app()
     with app.app_context():
         # Remove existing database file
         db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')

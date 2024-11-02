@@ -1,10 +1,12 @@
+# rm_except.py
+
 import os
 import shutil
 
 exceptions_list = [
     'templates',
     'app_respond.py',
-    'gen_prompt.py'
+    'gen_prompt.py',
     'clean_db.sh',
     'models.py',
     'README.md',

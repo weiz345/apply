@@ -3,6 +3,7 @@
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+
 class Resume(db.Model):
     __tablename__ = 'resumes'
     id = db.Column(db.Integer, primary_key=True)
