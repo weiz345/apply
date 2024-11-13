@@ -1,41 +1,18 @@
-# models.py
+from extensions import db, login_manager
+from flask_login import UserMixin
 
-from flask_sqlalchemy import SQLAlchemy
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-db = SQLAlchemy()
-
-class Resume(db.Model):
-    __tablename__ = 'resumes'
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String)
-    content = db.Column(db.Text)
-    user_emails = db.relationship(
-        'UserEmail',
-        back_populates='resume',
-        cascade='all, delete-orphan'
-    )
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    is_verified = db.Column(db.Boolean, default=False)
+    gmail_email = db.Column(db.String(150))
+    gmail_app_password = db.Column(db.String(150))
+    resume = db.Column(db.Text)
+    verification_code = db.Column(db.String(6))
 
-class Posting(db.Model):
-    __tablename__ = 'postings'
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String)
-    content = db.Column(db.Text)
-    recruiters = db.relationship(
-        'Recruiter',
-        back_populates='posting',
-        cascade='all, delete-orphan'
-    )
-
-class Recruiter(db.Model):
-    __tablename__ = 'recruiters'
-    id = db.Column(db.Integer, primary_key=True)
-    posting_id = db.Column(db.Integer, db.ForeignKey('postings.id'))
-    email = db.Column(db.String)
-    posting = db.relationship('Posting', back_populates='recruiters')
-
-class UserEmail(db.Model):
-    __tablename__ = 'user_emails'
-    id = db.Column(db.Integer, primary_key=True)
-    resume_id = db.Column(db.Integer, db.ForeignKey('resumes.id'))
-    email = db.Column(db.String)
-    resume = db.relationship('Resume', back_populates='user_emails')
+    def __repr__(self):
+        return f"User('{self.email}', verified={self.is_verified})"

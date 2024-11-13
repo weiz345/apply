@@ -1,9 +1,6 @@
-openai
-flask
-flask_sqlalchemy
-SQLAlchemy
-pandas
-numpy
-scikit-learn
-nltk
-pyperclip
+Flask
+Flask-WTF
+Flask-Mail
+Flask-Login
+Flask-SQLAlchemy
+email-validator

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Verify Email</h2>
+    <p>A verification code has been sent to {{ email }}. Please enter it below.</p>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.code.label(class="form-control-label") }}
+            {{ form.code(class="form-control") }}
+            {% for error in form.code.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Dashboard</h2>
+    {% if not current_user.gmail_email %}
+        <p>Please provide your Gmail email, app password, and resume.</p>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.gmail_email.label(class="form-control-label") }}
+                {{ form.gmail_email(class="form-control") }}
+                {% for error in form.gmail_email.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.gmail_app_password.label(class="form-control-label") }}
+                {{ form.gmail_app_password(class="form-control") }}
+                {% for error in form.gmail_app_password.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.resume.label(class="form-control-label") }}
+                {{ form.resume(class="form-control") }}
+                {% for error in form.resume.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    {% else %}
+        <p>Your information:</p>
+        <ul>
+            <li>Gmail Email: {{ current_user.gmail_email }}</li>
+            <li>Resume:</li>
+            <p>{{ current_user.resume }}</p>
+        </ul>
+    {% endif %}
+{% endblock %}
