@@ -1,13 +1,14 @@
 from flask import Flask, render_template, url_for, redirect, flash, request
 from flask_login import login_user, current_user, logout_user, login_required
-from flask_mail import Message  # Add this import
 from forms import RegistrationForm, VerificationForm, LoginForm, InfoForm, EditInfoForm
 from config import Config
 from extensions import db, mail, login_manager
 from models import User
 import random
 import string
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Message
+from functools import wraps
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -20,11 +21,21 @@ login_manager.login_view = 'login'
 def generate_verification_code():
     return ''.join(random.choices(string.digits, k=6))
 
+def email_verified_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_verified:
+            flash('Please verify your email to access this page.', 'warning')
+            return redirect(url_for('verify', email=current_user.email))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/')
-def home():
+def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -38,6 +49,7 @@ def register():
             return render_template('register.html', form=form)
         code = generate_verification_code()
         user = User(email=email, verification_code=code)
+        user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         # Send verification email
@@ -50,7 +62,7 @@ def register():
 
 @app.route('/verify/<email>', methods=['GET', 'POST'])
 def verify(email):
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.is_verified:
         return redirect(url_for('dashboard'))
     user = User.query.filter_by(email=email).first_or_404()
     form = VerificationForm()
@@ -59,8 +71,8 @@ def verify(email):
             user.is_verified = True
             user.verification_code = None
             db.session.commit()
-            flash('Your email has been verified. You can now log in.', 'success')
-            return redirect(url_for('login'))
+            flash('Your email has been verified.', 'success')
+            return redirect(url_for('dashboard'))
         else:
             flash('Invalid verification code.', 'danger')
     return render_template('verify.html', form=form, email=email)
@@ -72,15 +84,16 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
-        if user and user.is_verified:
+        if user and user.check_password(form.password.data):
             login_user(user)
             return redirect(url_for('dashboard'))
         else:
-            flash('Login Unsuccessful. Please check email and verify your account.', 'danger')
+            flash('Login Unsuccessful. Please check email and password.', 'danger')
     return render_template('login.html', form=form)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
+@email_verified_required
 def dashboard():
     if not current_user.gmail_email:
         form = InfoForm()
@@ -97,6 +110,7 @@ def dashboard():
 
 @app.route('/edit_info', methods=['GET', 'POST'])
 @login_required
+@email_verified_required
 def edit_info():
     form = EditInfoForm()
     if request.method == 'GET':
